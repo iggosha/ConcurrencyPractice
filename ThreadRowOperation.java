@@ -1,7 +1,7 @@
 public class ThreadRowOperation implements Runnable {
     int numRow;
     DataCommon dC;
-    Thread thread1;
+    Thread thread1, thread2;
 
     public ThreadRowOperation(DataCommon dC, int numRow) {
         this.dC = dC;
@@ -12,10 +12,18 @@ public class ThreadRowOperation implements Runnable {
 
     @Override
     public void run() {
-        synchronized (this.dC) {
+        Runnable r = () -> {
             dC.rowPrint(numRow);
-            System.out.print(" Среднее арифметическое ряда: " + dC.rowSrAr(numRow) + '\n');
-
+        };
+        synchronized (this.dC) {
+            try {
+                thread2 = new Thread(r, "Поток вывода");
+                thread2.start();
+                thread2.join();
+                System.out.print(" Среднее арифметическое ряда: " + dC.rowSrAr(numRow) + '\n');
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
